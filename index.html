@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Луна и Земля в 3D</title>
+    <script type="module">
+        import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js';
+
+        // Создание сцены
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Загрузка текстур
+        const textureLoader = new THREE.TextureLoader();
+        const earthTexture = textureLoader.load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');
+        const moonTexture = textureLoader.load('https://threejs.org/examples/textures/planets/moon_1024.jpg');
+        const starsTexture = textureLoader.load('https://threejs.org/examples/textures/cube/MilkyWay/dark-s_px.jpg');
+
+        // Добавляем фон со звездами
+        scene.background = starsTexture;
+
+        // Создание Земли
+        const earthGeometry = new THREE.SphereGeometry(1, 64, 64);
+        const earthMaterial = new THREE.MeshStandardMaterial({ map: earthTexture });
+        const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+        scene.add(earth);
+
+        // Создание Луны
+        const moonGeometry = new THREE.SphereGeometry(0.27, 64, 64);
+        const moonMaterial = new THREE.MeshStandardMaterial({ map: moonTexture });
+        const moon = new THREE.Mesh(moonGeometry, moonMaterial);
+
+        // Группа Земля-Луна
+        const earthMoonSystem = new THREE.Group();
+        earthMoonSystem.add(earth);
+        earthMoonSystem.add(moon);
+        scene.add(earthMoonSystem);
+
+        // Устанавливаем Луну на орбиту
+        moon.position.set(3, 0, 0);
+
+        // Добавляем "Солнце" (источник света)
+        const sunLight = new THREE.PointLight(0xffffff, 2);
+        sunLight.position.set(5, 0, 10);
+        scene.add(sunLight);
+
+        // Добавляем фоновый свет (чтобы было видно тени)
+        const ambientLight = new THREE.AmbientLight(0x404040, 1.5);
+        scene.add(ambientLight);
+
+        // Позиция камеры
+        camera.position.z = 5;
+
+        // Анимация
+        function animate() {
+            requestAnimationFrame(animate);
+
+            earth.rotation.y += 0.005; // Медленное вращение Земли
+            moon.rotation.y += 0.005;  // Вращение Луны
+            earthMoonSystem.rotation.y += 0.002; // Орбита Луны
+
+            // Двигаем источник света (имитация смены фаз Луны)
+            sunLight.position.x = Math.sin(Date.now() * 0.0002) * 10;
+            sunLight.position.z = Math.cos(Date.now() * 0.0002) * 10;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+    </script>
+</head>
+<body></body>
+</html>
